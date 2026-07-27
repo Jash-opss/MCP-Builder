@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  ownerId     String        @default("")
+  name        String
+  description String        @default("")
+  version     String        @default("1.0.0")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  tools       Tool[]
+  resources   Resource[]
+  prompts     Prompt[]
+  envVars     EnvVariable[]
+}
+
+model Tool {
+  id            String  @id @default(uuid())
+  projectId     String
+  name          String
+  description   String  @default("")
+  inputSchema   String  @default("[]")
+  handlerType   String  @default("code")
+  handlerCode   String  @default("")
+  handlerConfig String  @default("{}")
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Resource {
+  id          String  @id @default(uuid())
+  projectId   String
+  uri         String
+  name        String
+  description String  @default("")
+  mimeType    String  @default("text/plain")
+  handlerCode String  @default("")
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Prompt {
+  id          String  @id @default(uuid())
+  projectId   String
+  name        String
+  description String  @default("")
+  arguments   String  @default("[]")
+  template    String  @default("")
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model EnvVariable {
+  id          String  @id @default(uuid())
+  projectId   String
+  key         String
+  value       String  @default("")
+  description String  @default("")
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
